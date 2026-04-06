@@ -1,21 +1,21 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api import upload_routes 
 app = FastAPI(
     title="AI File Processing API",
     description="Backend for AI-driven file operations",
     version="1.0.0"
 )
 
-# Set up CORS (Cross-Origin Resource Sharing)
-# This is crucial so your React frontend can talk to this backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, change "*" to your React app's URL (e.g., "http://localhost:3000")
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(upload_routes.router, prefix="/api", tags=["File Processing"])
 
 @app.get("/")
 async def root():
