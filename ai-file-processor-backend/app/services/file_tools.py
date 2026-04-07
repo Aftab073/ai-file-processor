@@ -1,60 +1,104 @@
 import os
-import fitz  
 from PIL import Image
+from ilovepdf import CompressTask  
+import convertapi
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Initialize ConvertAPI
+convertapi.api_secret = os.getenv("CONVERTAPI_SECRET")
+# Initialize iLovePDF Keys
+ILOVEPDF_PUBLIC_KEY = os.getenv("ILOVEPDF_PUBLIC_KEY")
+ILOVEPDF_SECRET_KEY = os.getenv("ILOVEPDF_SECRET_KEY") # <--- ADDED THIS
 
 def convert_image(file_path: str, target_format: str) -> str:
-    """Converts an image to the target format (e.g., png, webp, jpeg)."""
-    # Clean up the target format string (remove dots, make lowercase)
+    """Converts an image to the target format."""
     target_format = target_format.lower().replace(".", "")
     if target_format == "jpg":
-        target_format = "jpeg" # PIL expects 'jpeg' instead of 'jpg'
+        target_format = "jpeg"
         
-    # Generate the new filename
     base_name, _ = os.path.splitext(file_path)
     new_file_path = f"{base_name}.{target_format}"
     
-    # Open, convert, and save the image
     with Image.open(file_path) as img:
-        # If converting to JPEG, we must remove the Alpha (transparency) channel
         if target_format == "jpeg" and img.mode in ("RGBA", "P"):
             img = img.convert("RGB")
-        
         img.save(new_file_path, format=target_format.upper())
         
     return new_file_path
 
-def compress_pdf(file_path: str, target_kb: int) -> dict:
+# --- THIRD PARTY API INTEGRATIONS ---
+
+def compress_with_ilovepdf(file_path: str, output_dir: str) -> str:
+    """Uses official iLovePDF SDK to compress the file."""
+    # Initialize the specific Compress task with both keys
+    task = CompressTask(public_key=ILOVEPDF_PUBLIC_KEY, secret_key=ILOVEPDF_SECRET_KEY)
+    
+    task.add_file(file_path)
+    task.execute()
+    task.download(output_dir)
+    
+    # Grab the downloaded file path
+    base_name, ext = os.path.splitext(os.path.basename(file_path))
+    expected_download_name = f"{base_name}{ext}" 
+    
+    output_path = os.path.join(output_dir, expected_download_name)
+    return output_path
+
+def compress_with_convertapi(file_path: str) -> str:
+    """Uses ConvertAPI SDK to compress the file."""
+    base_name, ext = os.path.splitext(file_path)
+    new_file_path = f"{base_name}_convertapi{ext}"
+    
+    result = convertapi.convert('compress', {
+        'File': file_path
+    }, from_format='pdf')
+    
+    result.file.save(new_file_path)
+    return new_file_path
+
+# --- THE MASTER FAILOVER MANAGER ---
+
+def deep_compress_pdf(file_path: str, target_kb: int) -> dict:
     """
-    Attempts to compress a PDF. 
-    Includes logic to skip compression if the file is already small enough!
+    Attempts to compress the PDF using a waterfall fallback strategy 
+    across multiple third-party APIs.
     """
     original_size_kb = os.path.getsize(file_path) / 1024
+    output_directory = os.path.dirname(file_path)
     
-    # EDGE CASE HANDLED: If it's already smaller, don't waste server CPU!
     if original_size_kb <= target_kb:
+        return {"path": file_path, "status": "skipped", "message": f"Already optimally sized at {round(original_size_kb)}KB."}
+
+    # First attempt: iLovePDF
+    try:
+        new_path = compress_with_ilovepdf(file_path, output_directory)
+        new_size_kb = os.path.getsize(new_path) / 1024
         return {
-            "path": file_path, 
-            "status": "skipped", 
-            "message": f"File is already {round(original_size_kb)}KB, which is smaller than the {target_kb}KB target."
+            "path": new_path, 
+            "status": "compressed", 
+            "message": f"Deep compressed via iLovePDF from {round(original_size_kb)}KB to {round(new_size_kb)}KB"
         }
-    
-    base_name, ext = os.path.splitext(file_path)
-    new_file_path = f"{base_name}_compressed{ext}"
-    
-    # Basic PDF Compression using PyMuPDF (Garbage Collection and Deflate)
-    doc = fitz.open(file_path)
-    doc.save(
-        new_file_path, 
-        garbage=4, 
-        deflate=True, 
-        clean=True
-    )
-    doc.close()
-    
-    new_size_kb = os.path.getsize(new_file_path) / 1024
-    
+    except Exception as e:
+        print(f"iLovePDF compression failed or rate limited: {e}")
+
+    # Second attempt (Failover): ConvertAPI
+    try:
+        new_path = compress_with_convertapi(file_path)
+        new_size_kb = os.path.getsize(new_path) / 1024
+        return {
+            "path": new_path, 
+            "status": "compressed", 
+            "message": f"Deep compressed via ConvertAPI from {round(original_size_kb)}KB to {round(new_size_kb)}KB"
+        }
+    except Exception as e:
+        print(f"ConvertAPI compression failed: {e}")
+        
+    # Total Failure Fallback
     return {
-        "path": new_file_path,
-        "status": "compressed",
-        "message": f"Compressed from {round(original_size_kb)}KB to {round(new_size_kb)}KB."
+        "path": file_path, 
+        "status": "error", 
+        "message": "All compression services are currently overloaded. Please try again later."
     }
