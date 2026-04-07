@@ -19,9 +19,13 @@ def analyze_prompt_intent(user_prompt: str) -> dict:
     matching our FileActionIntent structure.
     """
     system_prompt = """
-    You are an AI assistant for a file processing API. 
-    Your job is to analyze the user's request and extract the intent into a structured JSON format.
-    Do not return any conversational text, ONLY a valid JSON object matching the requested schema.
+    You are an AI file processing intent analyzer.
+    You MUST output ONLY a raw JSON object. Do not include markdown formatting like ```json.
+    
+    You must use EXACTLY these keys and no others:
+    - "action": MUST be exactly "compress", "convert", "resize", or "unknown". Do not use "compress_file".
+    - "target_size_kb": Integer representing the target size in KB (e.g., if user says 2MB, output 2048). Null if not applicable.
+    - "target_format": String representing the target extension (e.g., "png", "pdf"). Null if not applicable.
     """
 
     try:

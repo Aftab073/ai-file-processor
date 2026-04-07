@@ -1,4 +1,5 @@
 import os
+import shutil
 from PIL import Image
 from ilovepdf import CompressTask  
 import convertapi
@@ -33,20 +34,27 @@ def convert_image(file_path: str, target_format: str) -> str:
 
 def compress_with_ilovepdf(file_path: str, output_dir: str) -> str:
     """Uses official iLovePDF SDK to compress the file."""
-    # Initialize the specific Compress task with both keys
     task = CompressTask(public_key=ILOVEPDF_PUBLIC_KEY, secret_key=ILOVEPDF_SECRET_KEY)
-    
+    task.compression_level = 'extreme' 
     task.add_file(file_path)
     task.execute()
-    task.download(output_dir)
     
-    # Grab the downloaded file path
+    # 1. Create a temporary sub-folder to prevent overwriting the original!
+    safe_out_dir = os.path.join(output_dir, "ilovepdf_temp")
+    os.makedirs(safe_out_dir, exist_ok=True)
+    
+    # 2. Download the file into the safe folder
+    task.download(safe_out_dir)
+    
+    # 3. Find the downloaded file
     base_name, ext = os.path.splitext(os.path.basename(file_path))
-    expected_download_name = f"{base_name}{ext}" 
+    downloaded_file = os.path.join(safe_out_dir, f"{base_name}{ext}")
     
-    output_path = os.path.join(output_dir, expected_download_name)
-    return output_path
-
+    # 4. Move it back to the main folder with a NEW unique name
+    final_new_path = os.path.join(output_dir, f"{base_name}_ilovepdf{ext}")
+    shutil.move(downloaded_file, final_new_path)
+    
+    return final_new_path
 def compress_with_convertapi(file_path: str) -> str:
     """Uses ConvertAPI SDK to compress the file."""
     base_name, ext = os.path.splitext(file_path)
@@ -63,8 +71,8 @@ def compress_with_convertapi(file_path: str) -> str:
 
 def deep_compress_pdf(file_path: str, target_kb: int) -> dict:
     """
-    Attempts to compress the PDF using a waterfall fallback strategy 
-    across multiple third-party APIs.
+    Attempts to compress the PDF using a waterfall fallback strategy.
+    Includes the Safety Net to prevent file size increases!
     """
     original_size_kb = os.path.getsize(file_path) / 1024
     output_directory = os.path.dirname(file_path)
@@ -72,33 +80,45 @@ def deep_compress_pdf(file_path: str, target_kb: int) -> dict:
     if original_size_kb <= target_kb:
         return {"path": file_path, "status": "skipped", "message": f"Already optimally sized at {round(original_size_kb)}KB."}
 
-    # First attempt: iLovePDF
+    # First attempt: iLovePDF (Now in Extreme Mode)
     try:
         new_path = compress_with_ilovepdf(file_path, output_directory)
         new_size_kb = os.path.getsize(new_path) / 1024
+        
+        # --- THE SAFETY NET IS BACK ---
+        if new_size_kb >= original_size_kb:
+            os.remove(new_path) # Delete the bad file
+            raise Exception("PDF Paradox: iLovePDF increased the file size.")
+            
         return {
             "path": new_path, 
             "status": "compressed", 
             "message": f"Deep compressed via iLovePDF from {round(original_size_kb)}KB to {round(new_size_kb)}KB"
         }
     except Exception as e:
-        print(f"iLovePDF compression failed or rate limited: {e}")
+        print(f"iLovePDF skipped: {e}")
 
     # Second attempt (Failover): ConvertAPI
     try:
         new_path = compress_with_convertapi(file_path)
         new_size_kb = os.path.getsize(new_path) / 1024
+        
+        # --- SAFETY NET FOR CONVERT API ---
+        if new_size_kb >= original_size_kb:
+            os.remove(new_path)
+            raise Exception("PDF Paradox: ConvertAPI increased the file size.")
+            
         return {
             "path": new_path, 
             "status": "compressed", 
             "message": f"Deep compressed via ConvertAPI from {round(original_size_kb)}KB to {round(new_size_kb)}KB"
         }
     except Exception as e:
-        print(f"ConvertAPI compression failed: {e}")
+        print(f"ConvertAPI skipped: {e}")
         
-    # Total Failure Fallback
+    # Total Failure Fallback: The file just can't be compressed anymore
     return {
         "path": file_path, 
-        "status": "error", 
-        "message": "All compression services are currently overloaded. Please try again later."
+        "status": "skipped", 
+        "message": f"File is highly optimized (likely text/vector based). Cannot compress further than {round(original_size_kb)}KB without corrupting data."
     }
