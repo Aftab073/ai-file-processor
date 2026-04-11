@@ -1,8 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LayoutDashboard, Folder, History, Settings, Activity, BarChart2, Clock, FileText, Scissors, ImagePlus } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import FileProcessorCard from './FileProcessorCard';
-
+import AudioTranscribeCard from './AudioTranscribeCard';
 export default function DashboardLayout() {
+  const [activeView, setActiveView] = useState('file-processor');
+
+  const tools = {
+    'file-processor': {
+      component: <FileProcessorCard />,
+      title: "Process smarter.",
+      desc: "Intelligent compression, conversion, and resizing. Just drop your file and let AI do the rest.",
+      badge: "AI Powered Workspace"
+    },
+    'audio-transcriber': {
+      component: <AudioTranscribeCard />,
+      title: "Transcribe audio.",
+      desc: "Upload meeting recordings or voice notes. Lightning-fast AI transcription to text.",
+      badge: "AI Audio Workspace"
+    }
+  };
+
+  const currentTool = tools[activeView] || tools['file-processor'];
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex font-sans text-zinc-900 selection:bg-indigo-100 selection:text-indigo-900">
       
@@ -16,7 +36,8 @@ export default function DashboardLayout() {
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-6">
-          <NavItem icon={<LayoutDashboard size={20} strokeWidth={2.5} />} label="Workspace" active />
+          <NavItem icon={<LayoutDashboard size={20} strokeWidth={2.5} />} label="Workspace" active={activeView === 'file-processor'} onClick={() => setActiveView('file-processor')} />
+          <NavItem icon={<Activity size={20} />} label="Transcribe" active={activeView === 'audio-transcriber'} onClick={() => setActiveView('audio-transcriber')} />
           <NavItem icon={<Folder size={20} />} label="Files" />
           <NavItem icon={<History size={20} />} label="History" />
         </nav>
@@ -35,22 +56,33 @@ export default function DashboardLayout() {
           
           {/* Left Side: Hero Active Tool */}
           <div className="w-full lg:w-1/2 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
-            <header className="mb-8 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold tracking-wide uppercase shadow-sm">
-                <SparklesIcon className="w-3.5 h-3.5" />
-                AI Powered Workspace
-              </div>
-              <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 drop-shadow-sm">
-                Process smarter.
-              </h1>
-              <p className="text-base lg:text-lg text-zinc-500 max-w-md mx-auto lg:mx-0 font-medium leading-relaxed">
-                Intelligent compression, conversion, and resizing. Just drop your file and let AI do the rest.
-              </p>
-            </header>
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={activeView}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="w-full flex flex-col items-center lg:items-start"
+              >
+                <header className="mb-8 space-y-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold tracking-wide uppercase shadow-sm">
+                    <SparklesIcon className="w-3.5 h-3.5" />
+                    {currentTool.badge}
+                  </div>
+                  <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 drop-shadow-sm">
+                    {currentTool.title}
+                  </h1>
+                  <p className="text-base lg:text-lg text-zinc-500 max-w-md mx-auto lg:mx-0 font-medium leading-relaxed">
+                    {currentTool.desc}
+                  </p>
+                </header>
 
-            <div className="w-full max-w-xl">
-               <FileProcessorCard />
-            </div>
+                <div className="w-full max-w-xl">
+                   {currentTool.component}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Right Side: Showcase */}
@@ -64,7 +96,7 @@ export default function DashboardLayout() {
               <ComingSoonCard icon={<FileText className="w-5 h-5" />} title="PDF to Word" desc="Flawless document conversion" />
               <ComingSoonCard icon={<Scissors className="w-5 h-5" />} title="Split PDF" desc="Extract and sequence pages" />
               <ComingSoonCard icon={<ImagePlus className="w-5 h-5" />} title="Image Upscaler" desc="AI-driven resolution boost" />
-              <ComingSoonCard icon={<Activity className="w-5 h-5" />} title="Audio Transcribe" desc="Convert speech to text via AI" />
+              <ComingSoonCard icon={<Activity className="w-5 h-5" />} title="Audio Transcribe" desc="Convert speech to text via AI" isAvailable={true} onClick={() => setActiveView('audio-transcriber')} />
             </div>
             
             <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-indigo-50/50 to-white ring-1 ring-indigo-100/50 text-center flex flex-col items-center justify-center relative overflow-hidden">
@@ -90,29 +122,37 @@ function SparklesIcon(props) {
   );
 }
 
-function NavItem({ icon, label, active }) {
+function NavItem({ icon, label, active, onClick }) {
   return (
-    <a href="#" className={`group flex items-center justify-center lg:justify-start gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${active ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-100' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 hover:shadow-sm ring-1 ring-transparent hover:ring-zinc-200/50'}`}>
+    <button onClick={onClick} className={`w-full group flex items-center justify-center lg:justify-start gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${active ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-100' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 hover:shadow-sm ring-1 ring-transparent hover:ring-zinc-200/50'}`}>
       <span className={`${active ? 'text-indigo-600' : 'text-zinc-400 group-hover:text-zinc-600'} transition-colors duration-200`}>
         {icon}
       </span>
       <span className="hidden lg:block">{label}</span>
       {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600 hidden lg:block"></div>}
-    </a>
+    </button>
   );
 }
 
-function ComingSoonCard({ icon, title, desc }) {
+function ComingSoonCard({ icon, title, desc, isAvailable, onClick }) {
   return (
-    <div className="group p-4 bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100/60 overflow-hidden flex items-start text-left cursor-default transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:ring-indigo-100">
-      <div className="w-10 h-10 shrink-0 mr-3 bg-zinc-50 rounded-[0.6rem] flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-colors duration-300 ring-1 ring-zinc-100 group-hover:ring-indigo-200/50">
+    <div 
+      onClick={isAvailable ? onClick : undefined}
+      className={`group p-4 bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100/60 overflow-hidden flex items-start text-left transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:ring-indigo-100 ${isAvailable ? 'cursor-pointer hover:ring-indigo-300 ring-2 ring-indigo-500/20' : 'cursor-default'}`}
+    >
+      <div className={`w-10 h-10 shrink-0 mr-3 rounded-[0.6rem] flex items-center justify-center transition-colors duration-300 ring-1 ${isAvailable ? 'bg-indigo-50 text-indigo-500 ring-indigo-200' : 'bg-zinc-50 text-zinc-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 ring-zinc-100 group-hover:ring-indigo-200/50'}`}>
         {icon}
       </div>
       
       <div className="flex-1 mt-0.5">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-bold text-zinc-800 transition-colors group-hover:text-indigo-950 leading-none">{title}</h3>
-          <span className="text-[9px] font-bold tracking-widest text-indigo-500/80 bg-indigo-50/50 px-1.5 py-0.5 rounded uppercase ring-1 ring-indigo-500/10">Soon</span>
+          {!isAvailable && (
+            <span className="text-[9px] font-bold tracking-widest text-indigo-500/80 bg-indigo-50/50 px-1.5 py-0.5 rounded uppercase ring-1 ring-indigo-500/10">Soon</span>
+          )}
+          {isAvailable && (
+             <span className="text-[10px] font-bold tracking-wide text-green-600 bg-green-50 px-1.5 py-0.5 rounded-md uppercase ring-1 ring-green-500/20">New!</span>
+          )}
         </div>
         <p className="text-[11px] font-medium text-zinc-500 leading-snug">{desc}</p>
       </div>
