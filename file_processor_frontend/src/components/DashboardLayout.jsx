@@ -54,10 +54,16 @@ export default function DashboardLayout() {
         className="w-20 lg:w-64 bg-white/80 backdrop-blur-md border-r border-zinc-100 flex flex-col hidden md:flex transition-all duration-300 z-10 sticky top-0 h-screen"
       >
         <div className="p-6 flex items-center justify-center lg:justify-start gap-3">
-          <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
-            <SparklesIcon className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-white rounded-[1rem] flex items-center justify-center shadow-sm shrink-0 overflow-hidden ring-1 ring-zinc-200">
+            <img src="/logo.png" alt="DocuMind Logo" className="w-[140%] h-[140%] object-cover object-center pointer-events-none" />
           </div>
-          <span className="font-bold text-lg tracking-tight hidden lg:block text-zinc-800">TinyLink</span>
+          <motion.span 
+             animate={{ backgroundPosition: ['0% 50%', '200% 50%'] }}
+             transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+             className="font-extrabold text-xl tracking-tight hidden lg:block bg-gradient-to-r from-zinc-800 via-indigo-600 to-zinc-800 bg-[length:200%_auto] bg-clip-text text-transparent drop-shadow-sm"
+          >
+            DocuMind
+          </motion.span>
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-6">
