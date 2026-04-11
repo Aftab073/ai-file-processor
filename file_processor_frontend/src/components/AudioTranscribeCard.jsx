@@ -166,16 +166,46 @@ export default function AudioTranscribeCard() {
                   {/* Glowing background */}
                   <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-15 animate-pulse"></div>
                   
-                  {/* Audio Waveform Animation Container */}
-                  <div className="h-20 w-32 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-zinc-100/50 rounded-2xl flex items-center justify-center gap-1.5 relative overflow-hidden z-10 p-4">
-                     {[0.8, 1.2, 0.6, 1.5, 0.9].map((dur, i) => (
-                        <motion.div
-                          key={i}
-                          animate={{ height: ['20%', '100%', '20%'] }}
-                          transition={{ duration: dur, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]"
-                        />
-                     ))}
+                  {/* Ambient Liquid Core Container */}
+                  <div className="h-28 w-28 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-zinc-100/50 rounded-[2rem] flex items-center justify-center relative overflow-hidden z-10 p-4">
+                     
+                     {/* Base Glow Layer */}
+                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-16 h-16 bg-indigo-400/20 rounded-full blur-xl animate-pulse"></div>
+                     </div>
+
+                     {/* The Primary Liquid Blob */}
+                     <motion.div 
+                       animate={{ 
+                         rotate: [0, 360],
+                         borderRadius: [
+                           "60% 40% 30% 70% / 60% 30% 70% 40%",
+                           "30% 70% 70% 30% / 30% 30% 70% 70%",
+                           "60% 40% 30% 70% / 60% 30% 70% 40%"
+                         ]
+                       }}
+                       transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                       className="w-16 h-16 bg-gradient-to-tr from-indigo-500 via-purple-500 to-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.5)] mix-blend-multiply saturate-150 absolute"
+                     />
+
+                     {/* The Secondary Reverse Liquid Blob */}
+                     <motion.div 
+                       animate={{ 
+                         rotate: [360, 0],
+                         borderRadius: [
+                           "40% 60% 70% 30% / 40% 50% 60% 50%",
+                           "50% 50% 20% 80% / 20% 80% 50% 50%",
+                           "40% 60% 70% 30% / 40% 50% 60% 50%"
+                         ]
+                       }}
+                       transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+                       className="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-400 shadow-[0_0_15px_rgba(59,130,246,0.4)] mix-blend-multiply opacity-80 saturate-150 absolute"
+                     />
+
+                     {/* Center Mic icon riding the liquid */}
+                     <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none drop-shadow-md">
+                        <Mic className="w-5 h-5 text-white/90 animate-pulse" />
+                     </div>
                   </div>
                 </div>
                 <p className="mt-6 text-base font-semibold text-zinc-900">AI is listening...</p>

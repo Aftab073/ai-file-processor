@@ -23,11 +23,29 @@ export default function DashboardLayout() {
 
   const currentTool = tools[activeView] || tools['file-processor'];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15, delayChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex font-sans text-zinc-900 selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* 1. SIDEBAR */}
-      <aside className="w-20 lg:w-64 bg-white/80 backdrop-blur-md border-r border-zinc-100 flex flex-col hidden md:flex transition-all duration-300 z-10 sticky top-0 h-screen">
+      <motion.aside 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="w-20 lg:w-64 bg-white/80 backdrop-blur-md border-r border-zinc-100 flex flex-col hidden md:flex transition-all duration-300 z-10 sticky top-0 h-screen"
+      >
         <div className="p-6 flex items-center justify-center lg:justify-start gap-3">
           <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
             <SparklesIcon className="w-5 h-5 text-white" />
@@ -45,17 +63,22 @@ export default function DashboardLayout() {
         <div className="p-4 mt-auto mb-4 px-4">
            <NavItem icon={<Settings size={20} />} label="Settings" />
         </div>
-      </aside>
+      </motion.aside>
 
       {/* 2. MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative">
         {/* Subtle top decoration for Apple-like Clean UI */}
         <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-indigo-50/40 to-transparent pointer-events-none"></div>
         
-        <div className="flex-1 max-w-7xl mx-auto w-full p-6 lg:p-10 z-0 relative flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-10 lg:gap-16 pt-8 lg:pt-16">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex-1 max-w-7xl mx-auto w-full p-6 lg:p-10 z-0 relative flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-10 lg:gap-16 pt-8 lg:pt-16"
+        >
           
           {/* Left Side: Hero Active Tool */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
+          <motion.div variants={itemVariants} className="w-full lg:w-1/2 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={activeView}
@@ -83,10 +106,10 @@ export default function DashboardLayout() {
                 </div>
               </motion.div>
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           {/* Right Side: Showcase */}
-          <div className="w-full lg:w-5/12 flex flex-col justify-center max-w-xl">
+          <motion.div variants={itemVariants} className="w-full lg:w-5/12 flex flex-col justify-center max-w-xl">
             <div className="flex items-center gap-4 mb-8">
               <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Available Soon</h2>
               <div className="h-px bg-gradient-to-r from-zinc-200 to-transparent flex-1"></div>
@@ -104,9 +127,9 @@ export default function DashboardLayout() {
                 <h3 className="text-sm font-bold text-zinc-800 mb-1 z-10">We're expanding fast!</h3>
                 <p className="text-xs text-zinc-500 font-medium max-w-[250px] z-10">Our AI toolkit is growing. More premium features are arriving next quarter.</p>
             </div>
-          </div>
+          </motion.div>
 
-        </div>
+        </motion.div>
       </main>
     </div>
   );

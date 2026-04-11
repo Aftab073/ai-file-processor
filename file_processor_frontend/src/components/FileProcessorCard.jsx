@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, File, Sparkles, X, Loader2, CheckCircle2, Download, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +14,34 @@ export default function FileProcessorCard() {
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState(null); // Stores the backend response
+
+  // --- SUBTLE 3D MAGNETIC HOVER ---
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useTransform(mouseY, [-300, 300], [2, -2]); 
+  const rotateY = useTransform(mouseX, [-300, 300], [-2, 2]);
+
+  const springX = useSpring(rotateX, { stiffness: 300, damping: 30 });
+  const springY = useSpring(rotateY, { stiffness: 300, damping: 30 });
+
+  function handleMouseMove({ currentTarget, clientX, clientY }) {
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    const x = clientX - left - width / 2;
+    const y = clientY - top - height / 2;
+    mouseX.set(x);
+    mouseY.set(y);
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0);
+    mouseY.set(0);
+  }
+
+  // Soft spotlight glow effect
+  const glowX = useTransform(mouseX, x => x + 300);
+  const glowY = useTransform(mouseY, y => y + 250);
+  const background = useMotionTemplate`radial-gradient(500px circle at ${glowX}px ${glowY}px, rgba(99,102,241,0.06), transparent 80%)`;
 
   // --- DROPZONE LOGIC ---
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
@@ -87,8 +115,21 @@ export default function FileProcessorCard() {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-black/5 overflow-hidden transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)]">
-      <div className="p-8 sm:p-10">
+    <motion.div 
+      layout
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ rotateX: springX, rotateY: springY, transformPerspective: 1000 }}
+      transition={{ layout: { type: "spring", stiffness: 350, damping: 30 } }}
+      className="group relative w-full max-w-xl mx-auto bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-black/5 overflow-hidden transition-shadow duration-500 hover:shadow-[0_12px_45px_rgb(0,0,0,0.06)]"
+    >
+      {/* 3D Spotlight Glow */}
+      <motion.div 
+         className="pointer-events-none absolute -inset-px rounded-[2rem] transition duration-500 opacity-0 group-hover:opacity-100 z-0" 
+         style={{ background }} 
+      />
+
+      <motion.div layout className="relative z-10 p-8 sm:p-10">
         
         <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-900 drop-shadow-sm">
@@ -99,8 +140,8 @@ export default function FileProcessorCard() {
           </p>
         </div>
 
-        <div className="relative min-h-[250px] flex flex-col items-center justify-center">
-          <AnimatePresence mode="wait">
+        <motion.div layout className="relative flex flex-col items-center justify-center">
+          <AnimatePresence mode="popLayout">
             
             {/* STEP 1: IDLE */}
             {step === 'idle' && (
@@ -173,35 +214,52 @@ export default function FileProcessorCard() {
                   {/* Subtle pulsing background glow */}
                   <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-15 animate-pulse"></div>
                   
-                  {/* Premium Scanner Animation Container */}
-                  <div className="w-24 h-24 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-zinc-100/50 rounded-[2rem] flex items-center justify-center relative overflow-hidden z-10 group">
-                    {/* Base File Icon */}
-                    <File className="w-10 h-10 text-zinc-200" />
+                  {/* Data Node Disassembly Animation Container */}
+                  <div className="w-24 h-24 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-zinc-100/50 rounded-[2rem] flex items-center justify-center relative z-10 group overflow-visible">
                     
-                    {/* Scanning Line Effect */}
+                    {/* Outer spinning dash ring */}
                     <motion.div 
-                       initial={{ top: '-10%' }}
-                       animate={{ top: ['-10%', '110%', '-10%'] }}
-                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                       className="absolute left-0 right-0 h-[3px] bg-indigo-600 shadow-[0_0_12px_4px_rgba(79,70,229,0.5)] z-20"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-[-15%] rounded-full border-[1.5px] border-dashed border-indigo-200/60 opacity-60 pointer-events-none"
                     />
-                    
-                    {/* Floating Sparkles */}
+
+                    {/* Central pulsing neural core */}
                     <motion.div 
-                      animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5], rotate: [0, 90, 180] }} 
-                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} 
-                      className="absolute top-4 left-4"
+                       initial={{ scale: 0.8, opacity: 0.7 }}
+                       animate={{ scale: [0.8, 1.1, 0.8], opacity: [0.7, 1, 0.7] }}
+                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                       className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-400 shadow-[0_0_20px_rgba(79,70,229,0.6)] z-20 flex items-center justify-center relative overflow-hidden"
                     >
-                      <Sparkles className="w-4 h-4 text-indigo-400" />
+                       <File className="w-4 h-4 text-white z-10 absolute" />
+                       <motion.div 
+                         initial={{ y: "100%" }}
+                         animate={{ y: ["100%", "-100%"] }}
+                         transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                         className="absolute inset-0 bg-white/20 h-full w-full"
+                       />
                     </motion.div>
-                    
-                    <motion.div 
-                      animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5], rotate: [0, -90, -180] }} 
-                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1.25 }} 
-                      className="absolute bottom-5 right-5"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                    </motion.div>
+
+                    {/* Orbiting data particles */}
+                    {[...Array(8)].map((_, i) => (
+                       <motion.div
+                          key={i}
+                          className="absolute w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.8)]"
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{
+                             x: Math.cos((i * 45) * (Math.PI / 180)) * 40,
+                             y: Math.sin((i * 45) * (Math.PI / 180)) * 40,
+                             opacity: [0, 1, 0],
+                             scale: [0, 1.2, 0]
+                          }}
+                          transition={{
+                             duration: 2.5,
+                             repeat: Infinity,
+                             delay: i * 0.15,
+                             ease: "easeInOut"
+                          }}
+                       />
+                    ))}
                   </div>
                 </div>
                 <p className="mt-8 text-base font-semibold text-zinc-900">AI is processing your file...</p>
@@ -258,9 +316,9 @@ export default function FileProcessorCard() {
             )}
 
           </AnimatePresence>
-        </div>
+        </motion.div>
 
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
