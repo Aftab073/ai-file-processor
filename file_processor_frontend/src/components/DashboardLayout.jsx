@@ -3,6 +3,7 @@ import { LayoutDashboard, Folder, History, Settings, Activity, BarChart2, Clock,
 import { AnimatePresence, motion } from 'framer-motion';
 import FileProcessorCard from './FileProcessorCard';
 import AudioTranscribeCard from './AudioTranscribeCard';
+import ChatDocumentCard from './ChatDocumentCard';
 export default function DashboardLayout() {
   const [activeView, setActiveView] = useState('file-processor');
 
@@ -18,6 +19,12 @@ export default function DashboardLayout() {
       title: "Transcribe audio.",
       desc: "Upload meeting recordings or voice notes. Lightning-fast AI transcription to text.",
       badge: "AI Audio Workspace"
+    },
+    'chat-document': {
+      component: <ChatDocumentCard />,
+      title: "Chat with your PDF.",
+      desc: "Upload a large technical manual or contract, and ask questions contextually in seconds.",
+      badge: "AI Retrieval Workspace"
     }
   };
 
@@ -56,6 +63,7 @@ export default function DashboardLayout() {
         <nav className="flex-1 px-4 space-y-2 mt-6">
           <NavItem icon={<LayoutDashboard size={20} strokeWidth={2.5} />} label="Workspace" active={activeView === 'file-processor'} onClick={() => setActiveView('file-processor')} />
           <NavItem icon={<Activity size={20} />} label="Transcribe" active={activeView === 'audio-transcriber'} onClick={() => setActiveView('audio-transcriber')} />
+          <NavItem icon={<FileText size={20} />} label="Chat Doc" active={activeView === 'chat-document'} onClick={() => setActiveView('chat-document')} />
           <NavItem icon={<Folder size={20} />} label="Files" />
           <NavItem icon={<History size={20} />} label="History" />
         </nav>
@@ -116,7 +124,7 @@ export default function DashboardLayout() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-              <ComingSoonCard icon={<FileText className="w-5 h-5" />} title="PDF to Word" desc="Flawless document conversion" />
+              <ComingSoonCard icon={<FileText className="w-5 h-5" />} title="Chat with Doc" desc="AI-driven contextual PDF chat" isAvailable={true} onClick={() => setActiveView('chat-document')} />
               <ComingSoonCard icon={<Scissors className="w-5 h-5" />} title="Split PDF" desc="Extract and sequence pages" />
               <ComingSoonCard icon={<ImagePlus className="w-5 h-5" />} title="Image Upscaler" desc="AI-driven resolution boost" />
               <ComingSoonCard icon={<Activity className="w-5 h-5" />} title="Audio Transcribe" desc="Convert speech to text via AI" isAvailable={true} onClick={() => setActiveView('audio-transcriber')} />

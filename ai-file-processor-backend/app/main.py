@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import upload_routes, download_routes, audio_routes
+from app.api import upload_routes, download_routes, audio_routes, chat_routes
 app = FastAPI(
     title="AI File Processing API",
     description="Backend for AI-driven file operations",
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(upload_routes.router, prefix="/api", tags=["File Processing"])
 app.include_router(download_routes.router, prefix="/api", tags=["File Download"])
 app.include_router(audio_routes.router, prefix="/api", tags=["Audio Transcription"])
+app.include_router(chat_routes.router, prefix="/api/chat", tags=["Chat with Document"])
 
 @app.get("/")
 async def root():
