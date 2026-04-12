@@ -7,7 +7,7 @@ import axios from 'axios';
 import { cn } from '../lib/utils';
 
 // Your backend URL (make sure your FastAPI server is running!)
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 export default function FileProcessorCard() {
   const [step, setStep] = useState('idle'); // 'idle' | 'ready' | 'processing' | 'success'

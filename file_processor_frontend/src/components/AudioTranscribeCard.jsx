@@ -5,6 +5,8 @@ import { Mic, FileAudio, Sparkles, X, CheckCircle2, Copy, RotateCcw } from 'luci
 import { toast } from 'sonner';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
 export default function AudioTranscribeCard() {
   const [step, setStep] = useState('idle'); // 'idle' | 'ready' | 'processing' | 'success'
   const [file, setFile] = useState(null);
@@ -43,7 +45,7 @@ export default function AudioTranscribeCard() {
     formData.append('language', language);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/transcribe', formData, {
+      const response = await axios.post(`${API_BASE_URL}/api/transcribe`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
