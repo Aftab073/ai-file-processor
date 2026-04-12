@@ -13,7 +13,8 @@ export default function FileProcessorCard() {
   const [step, setStep] = useState('idle'); // 'idle' | 'ready' | 'processing' | 'success'
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState('');
-  const [result, setResult] = useState(null); // Stores the backend response
+  const [result, setResult] = useState(null);
+  const [isHovered, setIsHovered] = useState(false); // Stores the backend response
 
   // --- SUBTLE 3D MAGNETIC HOVER ---
   const mouseX = useMotionValue(0);
@@ -148,19 +149,45 @@ export default function FileProcessorCard() {
               <motion.div key="idle" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
                 <div 
                   {...getRootProps()} 
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
                   className={cn(
-                    "border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer group",
-                    isDragActive ? "border-indigo-500 bg-indigo-50/50 scale-[1.02] shadow-inner" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"
+                    "relative overflow-hidden border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group",
+                    isDragActive || isHovered ? "border-indigo-500 bg-indigo-50/80 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.1)]" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"
                   )}
                 >
                   <input {...getInputProps()} />
-                  <div className="w-16 h-16 mb-5 bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
-                    <UploadCloud className={cn("w-8 h-8 transition-colors duration-300", isDragActive ? "text-indigo-600" : "text-zinc-400 group-hover:text-indigo-500")} />
+                  
+                  {/* The Data Funnel Core */}
+                  <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
+                     
+                     {/* Dropping Particles when dragging */}
+                     <AnimatePresence>
+                        {(isDragActive || isHovered) && (
+                          <div className="absolute inset-0 -top-24 flex justify-center w-full pointer-events-none">
+                             {[...Array(5)].map((_, i) => (
+                                <motion.div 
+                                   key={i}
+                                   initial={{ y: -40, opacity: 0, scale: 0 }} 
+                                   animate={{ y: 20, opacity: [0, 1, 0], scale: [0, 1, 0.5] }} 
+                                   transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity, ease: 'easeIn' }} 
+                                   className={`absolute w-3 h-3 bg-indigo-${i % 2 === 0 ? '400' : '500'} rounded-full`}
+                                   style={{ left: `${20 + i * 15}%` }}
+                                />
+                             ))}
+                          </div>
+                        )}
+                     </AnimatePresence>
+                     
+                     <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center transition-transform duration-500 ease-out ${isDragActive || isHovered ? 'scale-110 shadow-indigo-200 ring-indigo-200 ring-2 drop-shadow-md translate-y-1' : 'group-hover:scale-105 group-hover:-translate-y-1'}`}>
+                        <UploadCloud className={cn("w-8 h-8 transition-all duration-300", isDragActive || isHovered ? "text-indigo-600 scale-110 -translate-y-0.5" : "text-zinc-400 group-hover:text-indigo-500")} />
+                     </div>
                   </div>
-                  <p className="text-base font-semibold text-zinc-800">
-                    {isDragActive ? "Drop the file here..." : "Drag & drop your file here"}
+
+                  <p className={cn("text-lg font-bold transition-colors duration-300 z-10 text-center", isDragActive || isHovered ? "text-indigo-700" : "text-zinc-800")}>
+                    {isDragActive ? "Drop your file to process..." : "Drag & drop your file here"}
                   </p>
-                  <p className="text-sm text-zinc-500 mt-2 font-medium">Supports PDF, JPG, PNG up to 10MB</p>
+                  <p className="text-sm text-zinc-500 mt-2 font-medium text-center z-10">Supports PDF, JPG, PNG up to 10MB</p>
                 </div>
               </motion.div>
             )}

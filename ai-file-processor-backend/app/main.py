@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import upload_routes, download_routes, audio_routes, chat_routes
 app = FastAPI(

@@ -12,6 +12,7 @@ export default function AudioTranscribeCard() {
   const [file, setFile] = useState(null);
   const [language, setLanguage] = useState('English');
   const [result, setResult] = useState(null); 
+  const [isHovered, setIsHovered] = useState(false);
 
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
     if (fileRejections.length > 0) {
@@ -101,19 +102,37 @@ export default function AudioTranscribeCard() {
             
             {/* STEP 1: IDLE */}
             {step === 'idle' && (
-              <motion.div key="idle" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
+              <motion.div key="idle" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full relative">
                 <div 
                   {...getRootProps()} 
-                  className={`border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer group ${isDragActive ? "border-indigo-500 bg-indigo-50/50 scale-[1.02] shadow-inner" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"}`}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  className={`relative border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group overflow-hidden ${isDragActive || isHovered ? "border-indigo-500 bg-indigo-50/80 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.1)]" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"}`}
                 >
                   <input {...getInputProps()} />
-                  <div className="w-16 h-16 mb-5 bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
-                    <Mic className={`w-8 h-8 transition-colors duration-300 ${isDragActive ? "text-indigo-600" : "text-zinc-400 group-hover:text-indigo-500"}`} />
+                  
+                  {/* The Audio Receptor Core */}
+                  <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
+                     {/* Ripples when dragging */}
+                     <AnimatePresence>
+                        {(isDragActive || isHovered) && (
+                          <>
+                            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 2.5, opacity: [0, 0.5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 bg-indigo-400 rounded-full" />
+                            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 3.5, opacity: [0, 0.3, 0] }} transition={{ duration: 1.5, delay: 0.2, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 border border-indigo-500 rounded-full" />
+                            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 4.5, opacity: [0, 0.1, 0] }} transition={{ duration: 1.5, delay: 0.4, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 bg-indigo-200 rounded-full" />
+                          </>
+                        )}
+                     </AnimatePresence>
+                     
+                     <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center transition-transform duration-500 ease-out ${isDragActive || isHovered ? 'scale-110 shadow-indigo-200 ring-indigo-200 ring-2' : 'group-hover:scale-105'}`}>
+                        <Mic className={`w-8 h-8 transition-colors duration-300 ${isDragActive || isHovered ? "text-indigo-600 animate-pulse" : "text-zinc-400 group-hover:text-indigo-500"}`} />
+                     </div>
                   </div>
-                  <p className="text-base font-semibold text-zinc-800 text-center">
-                    {isDragActive ? "Drop the audio here..." : "Drag & drop your voice note here"}
+
+                  <p className={`text-lg font-bold transition-colors duration-300 z-10 text-center ${isDragActive || isHovered ? "text-indigo-700" : "text-zinc-800"}`}>
+                    {isDragActive || isHovered ? "Ready to transcribe..." : "Drag & drop your voice note here"}
                   </p>
-                  <p className="text-sm text-zinc-500 mt-2 font-medium text-center">Supports MP3, WAV, M4A up to 25MB</p>
+                  <p className="text-sm text-zinc-500 mt-2 font-medium text-center z-10">Supports MP3, WAV, M4A up to 25MB</p>
                 </div>
               </motion.div>
             )}
