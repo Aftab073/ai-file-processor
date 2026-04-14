@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
-import { Mic, FileAudio, Sparkles, X, CheckCircle2, Copy, RotateCcw } from 'lucide-react';
+import { Mic, FileAudio, Sparkles, X, CheckCircle2, Copy, RotateCcw, Download, Link, Upload, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
@@ -9,10 +9,13 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000
 
 export default function AudioTranscribeCard() {
   const [step, setStep] = useState('idle'); // 'idle' | 'ready' | 'processing' | 'success'
+  const [inputMode, setInputMode] = useState('file'); // 'file' | 'url'
   const [file, setFile] = useState(null);
+  const [url, setUrl] = useState('');
   const [language, setLanguage] = useState('English');
   const [result, setResult] = useState(null); 
   const [isHovered, setIsHovered] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
     if (fileRejections.length > 0) {
@@ -36,37 +39,65 @@ export default function AudioTranscribeCard() {
     multiple: false
   });
 
+  const handleUrlSubmit = () => {
+    if (!url.trim()) {
+      toast.error("Please paste a valid URL.");
+      return;
+    }
+    // Basic URL validation
+    try {
+      new URL(url.trim());
+    } catch {
+      toast.error("That doesn't look like a valid URL.");
+      return;
+    }
+    setStep('ready');
+  };
+
   const handleTranscribe = async () => {
-    if (!file) return;
+    if (inputMode === 'file' && !file) return;
+    if (inputMode === 'url' && !url.trim()) return;
 
     setStep('processing');
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('language', language);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/transcribe`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      let response;
+
+      if (inputMode === 'file') {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('language', language);
+        response = await axios.post(`${API_BASE_URL}/api/transcribe`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        response = await axios.post(`${API_BASE_URL}/api/transcribe-url`, {
+          url: url.trim(),
+          language: language,
+        });
+      }
 
       if (response.data.status === 'success') {
         setResult({
-            text: response.data.text,
-            duration: response.data.duration
+          text: response.data.text,
+          summary: null,
+          duration: response.data.duration,
+          word_count: response.data.word_count,
+          video_title: response.data.video_title || null,
         });
         setStep('success');
         toast.success("Transcription complete!");
       }
     } catch (error) {
       console.error("Transcription Error:", error);
-      toast.error(error.response?.data?.detail || "Failed to transcribe audio.");
-      setStep('ready'); // Revert back to ready so user can retry
+      toast.error(error.response?.data?.detail || "Failed to transcribe. Please try again.");
+      setStep('ready');
     }
   };
 
   const handleReset = () => {
     setFile(null);
+    setUrl('');
     setResult(null);
     setStep('idle');
   };
@@ -76,6 +107,40 @@ export default function AudioTranscribeCard() {
       navigator.clipboard.writeText(result.text);
       toast.success("Copied to clipboard!");
     }
+  };
+
+  const handleSummarize = async () => {
+    if (!result?.text || isSummarizing) return;
+    setIsSummarizing(true);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/summarize`, {
+        text: result.text,
+      });
+      if (response.data.status === 'success') {
+        setResult(prev => ({ ...prev, summary: response.data.summary }));
+        toast.success("Summary generated!");
+      }
+    } catch (error) {
+      console.error("Summary Error:", error);
+      toast.error("Failed to generate summary.");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!result?.text) return;
+    const content = `${result.summary ? `--- AI SUMMARY ---\n${result.summary}\n\n--- FULL TRANSCRIPT ---\n` : ''}${result.text}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const downloadUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `transcript_${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(downloadUrl);
+    toast.success("Transcript downloaded!");
   };
 
   const fadeVariants = {
@@ -103,54 +168,140 @@ export default function AudioTranscribeCard() {
             {/* STEP 1: IDLE */}
             {step === 'idle' && (
               <motion.div key="idle" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full relative">
-                <div 
-                  {...getRootProps()} 
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
-                  className={`relative border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group overflow-hidden ${isDragActive || isHovered ? "border-indigo-500 bg-indigo-50/80 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.1)]" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"}`}
-                >
-                  <input {...getInputProps()} />
-                  
-                  {/* The Audio Receptor Core */}
-                  <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
-                     {/* Ripples when dragging */}
-                     <AnimatePresence>
-                        {(isDragActive || isHovered) && (
-                          <>
-                            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 2.5, opacity: [0, 0.5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 bg-indigo-400 rounded-full" />
-                            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 3.5, opacity: [0, 0.3, 0] }} transition={{ duration: 1.5, delay: 0.2, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 border border-indigo-500 rounded-full" />
-                            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 4.5, opacity: [0, 0.1, 0] }} transition={{ duration: 1.5, delay: 0.4, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 bg-indigo-200 rounded-full" />
-                          </>
-                        )}
-                     </AnimatePresence>
-                     
-                     <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center transition-transform duration-500 ease-out ${isDragActive || isHovered ? 'scale-110 shadow-indigo-200 ring-indigo-200 ring-2' : 'group-hover:scale-105'}`}>
-                        <Mic className={`w-8 h-8 transition-colors duration-300 ${isDragActive || isHovered ? "text-indigo-600 animate-pulse" : "text-zinc-400 group-hover:text-indigo-500"}`} />
-                     </div>
+                
+                {/* Input Mode Toggle */}
+                <div className="flex items-center justify-center mb-6">
+                  <div className="inline-flex bg-zinc-100 rounded-2xl p-1 ring-1 ring-zinc-200/50">
+                    <button
+                      onClick={() => setInputMode('file')}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                        inputMode === 'file' 
+                          ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100' 
+                          : 'text-zinc-500 hover:text-zinc-700'
+                      }`}
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span>Upload File</span>
+                    </button>
+                    <button
+                      onClick={() => setInputMode('url')}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                        inputMode === 'url' 
+                          ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100' 
+                          : 'text-zinc-500 hover:text-zinc-700'
+                      }`}
+                    >
+                      <Link className="w-4 h-4" />
+                      <span>Paste URL</span>
+                    </button>
                   </div>
-
-                  <p className={`text-lg font-bold transition-colors duration-300 z-10 text-center ${isDragActive || isHovered ? "text-indigo-700" : "text-zinc-800"}`}>
-                    {isDragActive || isHovered ? "Ready to transcribe..." : "Drag & drop your voice note here"}
-                  </p>
-                  <p className="text-sm text-zinc-500 mt-2 font-medium text-center z-10">Supports MP3, WAV, M4A up to 25MB</p>
                 </div>
+
+                <AnimatePresence mode="wait">
+                  {inputMode === 'file' ? (
+                    <motion.div key="file-drop" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                      <div 
+                        {...getRootProps()} 
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                        className={`relative border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group overflow-hidden ${isDragActive || isHovered ? "border-indigo-500 bg-indigo-50/80 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.1)]" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"}`}
+                      >
+                        <input {...getInputProps()} />
+                        
+                        {/* The Audio Receptor Core */}
+                        <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
+                           <AnimatePresence>
+                              {(isDragActive || isHovered) && (
+                                <>
+                                  <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 2.5, opacity: [0, 0.5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 bg-indigo-400 rounded-full" />
+                                  <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 3.5, opacity: [0, 0.3, 0] }} transition={{ duration: 1.5, delay: 0.2, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 border border-indigo-500 rounded-full" />
+                                  <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 4.5, opacity: [0, 0.1, 0] }} transition={{ duration: 1.5, delay: 0.4, repeat: Infinity, ease: 'easeOut' }} className="absolute inset-0 bg-indigo-200 rounded-full" />
+                                </>
+                              )}
+                           </AnimatePresence>
+                           
+                           <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center transition-transform duration-500 ease-out ${isDragActive || isHovered ? 'scale-110 shadow-indigo-200 ring-indigo-200 ring-2' : 'group-hover:scale-105'}`}>
+                              <Mic className={`w-8 h-8 transition-colors duration-300 ${isDragActive || isHovered ? "text-indigo-600 animate-pulse" : "text-zinc-400 group-hover:text-indigo-500"}`} />
+                           </div>
+                        </div>
+
+                        <p className={`text-lg font-bold transition-colors duration-300 z-10 text-center ${isDragActive || isHovered ? "text-indigo-700" : "text-zinc-800"}`}>
+                          {isDragActive || isHovered ? "Ready to transcribe..." : "Drag & drop your voice note here"}
+                        </p>
+                        <p className="text-sm text-zinc-500 mt-2 font-medium text-center z-10">Supports MP3, WAV, M4A up to 25MB</p>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="url-input" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="w-full">
+                      <div className="relative border-2 border-dashed rounded-[1.5rem] p-10 lg:p-12 flex flex-col items-center justify-center transition-all duration-500 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 group border-zinc-200">
+                        
+                        <div className="relative w-16 h-16 mb-6 flex items-center justify-center">
+                          <div className="w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                            <Globe className="w-7 h-7 text-zinc-400 group-hover:text-indigo-500 transition-colors duration-300" />
+                          </div>
+                        </div>
+                        
+                        <p className="text-base font-bold text-zinc-800 mb-1">Paste a video or audio URL</p>
+                        <p className="text-xs text-zinc-500 font-medium mb-6">YouTube, Instagram, Twitter/X, and 1000+ platforms</p>
+                        
+                        <div className="w-full flex gap-3">
+                          <div className="flex-1 relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                              <Link className="h-4 w-4 text-zinc-400" />
+                            </div>
+                            <input
+                              type="url"
+                              value={url}
+                              onChange={(e) => setUrl(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
+                              placeholder="https://youtube.com/watch?v=..."
+                              className="block w-full pl-11 pr-4 py-3.5 ring-1 ring-zinc-200 rounded-xl bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all duration-300"
+                            />
+                          </div>
+                          <button
+                            onClick={handleUrlSubmit}
+                            disabled={!url.trim()}
+                            className="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-300 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                          >
+                            Go
+                          </button>
+                        </div>
+
+                        <p className="text-[11px] text-zinc-400 font-medium mt-4">⏱ Max 5-minute videos supported on free tier</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
             {/* STEP 2: READY */}
-            {step === 'ready' && file && (
+            {step === 'ready' && (
               <motion.div key="ready" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
                 <div className="flex items-center justify-between p-4 mb-6 bg-white ring-1 ring-zinc-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-2xl group">
                   <div className="flex items-center space-x-4 overflow-hidden">
                     <div className="bg-indigo-50/50 p-2.5 rounded-xl shadow-sm border border-indigo-100/50 group-hover:scale-105 transition-transform duration-300">
-                      <FileAudio className="w-6 h-6 text-indigo-600" />
+                      {inputMode === 'file' ? (
+                        <FileAudio className="w-6 h-6 text-indigo-600" />
+                      ) : (
+                        <Globe className="w-6 h-6 text-indigo-600" />
+                      )}
                     </div>
                     <div className="text-left overflow-hidden">
-                      <p className="text-sm font-semibold text-zinc-900 truncate max-w-[220px] sm:max-w-[300px]">{file.name}</p>
-                      <p className="text-xs text-zinc-500 font-medium mt-0.5">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      {inputMode === 'file' ? (
+                        <>
+                          <p className="text-sm font-semibold text-zinc-900 truncate max-w-[220px] sm:max-w-[300px]">{file?.name}</p>
+                          <p className="text-xs text-zinc-500 font-medium mt-0.5">{file ? (file.size / (1024 * 1024)).toFixed(2) : 0} MB</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-semibold text-zinc-900 truncate max-w-[220px] sm:max-w-[300px]">{url}</p>
+                          <p className="text-xs text-zinc-500 font-medium mt-0.5">URL Transcription</p>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <button onClick={() => { setFile(null); setStep('idle'); }} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-100">
+                  <button onClick={handleReset} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-100">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -166,6 +317,7 @@ export default function AudioTranscribeCard() {
                   >
                      <option value="English">English (Faster Default)</option>
                      <option value="Auto">Auto-Detect Language</option>
+                     <option value="Hindi">Hindi (हिंदी)</option>
                      <option value="French">French</option>
                      <option value="Spanish">Spanish</option>
                   </select>
@@ -229,48 +381,113 @@ export default function AudioTranscribeCard() {
                      </div>
                   </div>
                 </div>
-                <p className="mt-6 text-base font-semibold text-zinc-900">AI is listening...</p>
-                <p className="mt-1.5 text-sm text-zinc-500 font-medium">Extracting words from your audio.</p>
+                <p className="mt-6 text-base font-semibold text-zinc-900">
+                  AI is listening...
+                </p>
+                <p className="mt-1.5 text-sm text-zinc-500 font-medium">
+                  Extracting words and generating your transcript.
+                </p>
               </motion.div>
             )}
 
             {/* STEP 4: SUCCESS */}
             {step === 'success' && result && (
-              <motion.div key="success" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full text-center">
+              <motion.div key="success" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
                 
-                <div className="flex items-center justify-between mb-4 px-2">
+                {/* Header with stats */}
+                <div className="flex items-center justify-between mb-5 px-1">
                    <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                       <h3 className="text-sm font-bold text-zinc-900">Transcript Ready</h3>
                    </div>
-                   <span className="text-xs font-semibold text-zinc-400 bg-zinc-100 px-2 py-1 rounded-md">{result.duration}</span>
+                   <div className="flex items-center gap-2">
+                     <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-100 px-2 py-1 rounded-md">{result.word_count} words</span>
+                     <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-100 px-2 py-1 rounded-md">{result.duration}</span>
+                   </div>
                 </div>
+
+                {/* Video title if URL mode */}
+                {result.video_title && (
+                  <div className="mb-4 px-1">
+                    <p className="text-xs text-zinc-500 font-medium truncate">
+                      <span className="text-zinc-400">Source:</span> {result.video_title}
+                    </p>
+                  </div>
+                )}
                 
-                {/* Scrollable Text Area */}
+                {/* AI Summary Card — On Demand */}
+                {result.summary ? (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    className="w-full bg-gradient-to-br from-indigo-50 to-purple-50/50 ring-1 ring-indigo-100 rounded-2xl p-5 mb-4 text-left relative overflow-hidden"
+                  >
+                    <div className="absolute top-2 right-3 opacity-30">
+                      <Sparkles className="w-8 h-8 text-indigo-300" />
+                    </div>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <Sparkles className="w-4 h-4 text-indigo-600" />
+                      <h4 className="text-xs font-bold text-indigo-700 uppercase tracking-widest">AI Summary</h4>
+                    </div>
+                    <p className="text-sm text-zinc-700 leading-relaxed font-medium relative z-10">
+                      {result.summary}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <button
+                    onClick={handleSummarize}
+                    disabled={isSummarizing}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 mb-4 rounded-2xl text-sm font-semibold text-indigo-700 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 ring-1 ring-indigo-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 disabled:opacity-60 disabled:cursor-wait disabled:hover:translate-y-0"
+                  >
+                    {isSummarizing ? (
+                      <>
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 border-2 border-indigo-300 border-t-indigo-600 rounded-full" />
+                        Generating summary...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        Generate AI Summary
+                      </>
+                    )}
+                  </button>
+                )}
+                
+                {/* Full Transcript */}
                 <div className="w-full bg-[#FAFAFA] ring-1 ring-zinc-200 rounded-2xl p-5 mb-6 text-left shadow-inner">
+                    <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Full Transcript</h4>
                     <p className="text-sm text-zinc-700 leading-relaxed h-32 overflow-y-auto pr-2 custom-scrollbar font-medium">
                         {result.text}
                     </p>
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   <button
                     onClick={handleCopy}
-                    className="w-full flex items-center justify-center py-4 px-4 rounded-2xl shadow-[0_4px_14px_rgba(79,70,229,0.3)] text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300"
+                    className="flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 ring-1 ring-indigo-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
                   >
-                    <Copy className="w-5 h-5 mr-2" />
-                    Copy to Clipboard
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
                   </button>
                   
                   <button
-                    onClick={handleReset}
-                    className="w-full flex items-center justify-center py-4 px-4 rounded-2xl text-base font-semibold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 transition-all duration-200"
+                    onClick={handleDownload}
+                    className="flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-[0_4px_14px_rgba(79,70,229,0.3)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300"
                   >
-                    <RotateCcw className="w-5 h-5 mr-2" />
-                    Transcribe new file
+                    <Download className="w-4 h-4 mr-2" />
+                    Download .txt
                   </button>
                 </div>
+                
+                <button
+                  onClick={handleReset}
+                  className="w-full flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 transition-all duration-200"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Transcribe another
+                </button>
 
               </motion.div>
             )}
