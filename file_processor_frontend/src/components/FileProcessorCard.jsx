@@ -42,7 +42,7 @@ export default function FileProcessorCard() {
   // Soft spotlight glow effect
   const glowX = useTransform(mouseX, x => x + 300);
   const glowY = useTransform(mouseY, y => y + 250);
-  const background = useMotionTemplate`radial-gradient(500px circle at ${glowX}px ${glowY}px, rgba(99,102,241,0.06), transparent 80%)`;
+  const background = useMotionTemplate`radial-gradient(500px circle at ${glowX}px ${glowY}px, rgba(99,102,241,0.12), transparent 80%)`;
 
   // --- DROPZONE LOGIC ---
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
@@ -122,7 +122,7 @@ export default function FileProcessorCard() {
       onMouseLeave={handleMouseLeave}
       style={{ rotateX: springX, rotateY: springY, transformPerspective: 1000 }}
       transition={{ layout: { type: "spring", stiffness: 350, damping: 30 } }}
-      className="group relative w-full max-w-xl mx-auto bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-black/5 overflow-hidden transition-shadow duration-500 hover:shadow-[0_12px_45px_rgb(0,0,0,0.06)]"
+      className="group relative w-full max-w-xl mx-auto bg-white/[0.03] backdrop-blur-sm rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.2)] ring-1 ring-white/[0.08] overflow-hidden transition-shadow duration-500 hover:shadow-[0_12px_45px_rgb(0,0,0,0.3)] hover:ring-white/[0.12]"
     >
       {/* 3D Spotlight Glow */}
       <motion.div 
@@ -133,7 +133,7 @@ export default function FileProcessorCard() {
       <motion.div layout className="relative z-10 p-8 sm:p-10">
         
         <div className="text-center mb-8">
-          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-900 drop-shadow-sm">
+          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-100 drop-shadow-sm">
             Process a File
           </h2>
           <p className="text-sm sm:text-base text-zinc-500 mt-2 font-medium">
@@ -153,7 +153,7 @@ export default function FileProcessorCard() {
                   onMouseLeave={() => setIsHovered(false)}
                   className={cn(
                     "relative overflow-hidden border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group",
-                    isDragActive || isHovered ? "border-indigo-500 bg-indigo-50/80 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.1)]" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"
+                    isDragActive || isHovered ? "border-indigo-500/60 bg-indigo-500/10 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.15)]" : "border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30"
                   )}
                 >
                   <input {...getInputProps()} />
@@ -179,15 +179,15 @@ export default function FileProcessorCard() {
                         )}
                      </AnimatePresence>
                      
-                     <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center transition-transform duration-500 ease-out ${isDragActive || isHovered ? 'scale-110 shadow-indigo-200 ring-indigo-200 ring-2 drop-shadow-md translate-y-1' : 'group-hover:scale-105 group-hover:-translate-y-1'}`}>
-                        <UploadCloud className={cn("w-8 h-8 transition-all duration-300", isDragActive || isHovered ? "text-indigo-600 scale-110 -translate-y-0.5" : "text-zinc-400 group-hover:text-indigo-500")} />
+                     <div className={`relative z-10 w-full h-full bg-white/[0.06] rounded-2xl shadow-sm ring-1 ring-white/[0.1] flex items-center justify-center transition-transform duration-500 ease-out ${isDragActive || isHovered ? 'scale-110 shadow-indigo-500/30 ring-indigo-500/40 ring-2 drop-shadow-md translate-y-1' : 'group-hover:scale-105 group-hover:-translate-y-1'}`}>
+                        <UploadCloud className={cn("w-8 h-8 transition-all duration-300", isDragActive || isHovered ? "text-indigo-400 scale-110 -translate-y-0.5" : "text-zinc-500 group-hover:text-indigo-400")} />
                      </div>
                   </div>
 
-                  <p className={cn("text-lg font-bold transition-colors duration-300 z-10 text-center", isDragActive || isHovered ? "text-indigo-700" : "text-zinc-800")}>
+                  <p className={cn("text-lg font-bold transition-colors duration-300 z-10 text-center", isDragActive || isHovered ? "text-indigo-400" : "text-zinc-300")}>
                     {isDragActive ? "Drop your file to process..." : "Drag & drop your file here"}
                   </p>
-                  <p className="text-sm text-zinc-500 mt-2 font-medium text-center z-10">Supports PDF, JPG, PNG up to 10MB</p>
+                  <p className="text-sm text-zinc-600 mt-2 font-medium text-center z-10">Supports PDF, JPG, PNG up to 10MB</p>
                 </div>
               </motion.div>
             )}
@@ -195,28 +195,28 @@ export default function FileProcessorCard() {
             {/* STEP 2: READY */}
             {step === 'ready' && file && (
               <motion.div key="ready" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
-                <div className="flex items-center justify-between p-4 mb-6 bg-white ring-1 ring-zinc-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-2xl group">
+                <div className="flex items-center justify-between p-4 mb-6 bg-white/[0.04] ring-1 ring-white/[0.08] rounded-2xl group">
                   <div className="flex items-center space-x-4 overflow-hidden">
-                    <div className="bg-indigo-50/50 p-2.5 rounded-xl shadow-sm border border-indigo-100/50 group-hover:scale-105 transition-transform duration-300">
-                      <File className="w-6 h-6 text-indigo-600" />
+                    <div className="bg-indigo-500/15 p-2.5 rounded-xl border border-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+                      <File className="w-6 h-6 text-indigo-400" />
                     </div>
                     <div className="text-left overflow-hidden">
-                      <p className="text-sm font-semibold text-zinc-900 truncate max-w-[220px] sm:max-w-[300px]">{file.name}</p>
+                      <p className="text-sm font-semibold text-zinc-200 truncate max-w-[220px] sm:max-w-[300px]">{file.name}</p>
                       <p className="text-xs text-zinc-500 font-medium mt-0.5">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                     </div>
                   </div>
-                  <button onClick={() => { setFile(null); setStep('idle'); }} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-100">
+                  <button onClick={() => { setFile(null); setStep('idle'); }} className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="relative mb-8 group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Sparkles className="h-5 w-5 text-indigo-500 transition-transform duration-300 group-focus-within:scale-110 group-focus-within:text-indigo-600" />
+                    <Sparkles className="h-5 w-5 text-indigo-400 transition-transform duration-300 group-focus-within:scale-110" />
                   </div>
                   <input
                     type="text"
-                    className="block w-full pl-12 pr-4 py-4 ring-1 ring-zinc-200 rounded-2xl leading-5 bg-[#FAFAFA] hover:bg-white focus:bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-base shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all duration-300"
+                    className="block w-full pl-12 pr-4 py-4 ring-1 ring-white/[0.1] rounded-2xl leading-5 bg-white/[0.04] hover:bg-white/[0.06] focus:bg-white/[0.06] text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-base transition-all duration-300"
                     placeholder="e.g., Compress this PDF to 2MB"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -242,13 +242,12 @@ export default function FileProcessorCard() {
                   <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-15 animate-pulse"></div>
                   
                   {/* Data Node Disassembly Animation Container */}
-                  <div className="w-24 h-24 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-zinc-100/50 rounded-[2rem] flex items-center justify-center relative z-10 group overflow-visible">
+                  <div className="w-24 h-24 bg-white/[0.04] shadow-[0_8px_30px_rgb(0,0,0,0.2)] ring-1 ring-white/[0.08] rounded-[2rem] flex items-center justify-center relative z-10 group overflow-visible">
                     
-                    {/* Outer spinning dash ring */}
                     <motion.div 
                       animate={{ rotate: 360 }}
                       transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-[-15%] rounded-full border-[1.5px] border-dashed border-indigo-200/60 opacity-60 pointer-events-none"
+                      className="absolute inset-[-15%] rounded-full border-[1.5px] border-dashed border-indigo-400/30 opacity-60 pointer-events-none"
                     />
 
                     {/* Central pulsing neural core */}
@@ -289,7 +288,7 @@ export default function FileProcessorCard() {
                     ))}
                   </div>
                 </div>
-                <p className="mt-8 text-base font-semibold text-zinc-900">AI is processing your file...</p>
+                <p className="mt-8 text-base font-semibold text-zinc-200">AI is processing your file...</p>
                 <p className="mt-1.5 text-sm text-zinc-500 font-medium">This usually takes a few seconds.</p>
               </motion.div>
             )}
@@ -299,32 +298,30 @@ export default function FileProcessorCard() {
               <motion.div key="success" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full text-center">
                 
                 <div className="flex justify-center mb-5">
-                  <div className="bg-green-50 p-4 rounded-2xl ring-1 ring-green-100/50 shadow-sm animate-[bounce_1s_ease-out_1]">
-                    <CheckCircle2 className="w-10 h-10 text-green-500" />
+                  <div className="bg-green-500/10 p-4 rounded-2xl ring-1 ring-green-500/20 animate-[bounce_1s_ease-out_1]">
+                    <CheckCircle2 className="w-10 h-10 text-green-400" />
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-bold text-zinc-900 mb-2">Processing Complete!</h3>
-                <p className="text-base text-zinc-500 font-medium mb-8">{result.processing_message}</p>
+                <h3 className="text-xl font-bold text-zinc-100 mb-2">Processing Complete!</h3>
+                <p className="text-base text-zinc-400 font-medium mb-8">{result.processing_message}</p>
 
-                {/* File Stats Box */}
-                <div className="flex justify-center gap-8 p-5 bg-[#FAFAFA] ring-1 ring-zinc-100 rounded-2xl mb-8 shadow-inner">
+                <div className="flex justify-center gap-8 p-5 bg-white/[0.03] ring-1 ring-white/[0.08] rounded-2xl mb-8">
                   <div className="text-center">
-                    <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider mb-1.5">Original Size</p>
-                    <p className="text-base font-bold text-zinc-800">{result.file_details.original_size_mb} MB</p>
+                    <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-1.5">Original Size</p>
+                    <p className="text-base font-bold text-zinc-300">{result.file_details.original_size_mb} MB</p>
                   </div>
-                  <div className="w-px bg-zinc-200"></div>
+                  <div className="w-px bg-white/[0.08]"></div>
                   <div className="text-center">
-                    <p className="text-xs text-zinc-400 font-semibold uppercase tracking-wider mb-1.5">New Size</p>
-                    <p className="text-base font-bold text-indigo-600">{result.file_details.final_size_mb} MB</p>
+                    <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-1.5">New Size</p>
+                    <p className="text-base font-bold text-indigo-400">{result.file_details.final_size_mb} MB</p>
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="space-y-3">
                   <button
                     onClick={handleDownload}
-                    className="w-full flex items-center justify-center py-4 px-4 rounded-2xl shadow-[0_4px_14px_rgba(79,70,229,0.3)] text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 hover:shadow-[0_6px_20px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300"
+                    className="w-full flex items-center justify-center py-4 px-4 rounded-2xl shadow-[0_4px_14px_rgba(79,70,229,0.3)] text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300"
                   >
                     <Download className="w-5 h-5 mr-2" />
                     Download File
@@ -332,7 +329,7 @@ export default function FileProcessorCard() {
                   
                   <button
                     onClick={handleReset}
-                    className="w-full flex items-center justify-center py-4 px-4 rounded-2xl text-base font-semibold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 transition-all duration-200"
+                    className="w-full flex items-center justify-center py-4 px-4 rounded-2xl text-base font-semibold text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-white/[0.1] transition-all duration-200"
                   >
                     <RotateCcw className="w-5 h-5 mr-2" />
                     Process another file

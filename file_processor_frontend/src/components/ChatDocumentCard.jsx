@@ -51,7 +51,7 @@ export default function ChatDocumentCard() {
 
   const glowX = useTransform(mouseX, x => x + 300);
   const glowY = useTransform(mouseY, y => y + 250);
-  const background = useMotionTemplate`radial-gradient(500px circle at ${glowX}px ${glowY}px, rgba(99,102,241,0.06), transparent 80%)`;
+  const background = useMotionTemplate`radial-gradient(500px circle at ${glowX}px ${glowY}px, rgba(99,102,241,0.12), transparent 80%)`;
 
   // --- DROPZONE ---
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
@@ -132,7 +132,7 @@ export default function ChatDocumentCard() {
         transformPerspective: 1000 
       }}
       transition={{ layout: { type: "spring", stiffness: 350, damping: 30 } }}
-      className={`group relative w-full mx-auto bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-black/5 overflow-hidden transition-all duration-500 hover:shadow-[0_12px_45px_rgb(0,0,0,0.06)] ${step === 'chat' ? 'max-w-2xl' : 'max-w-xl'}`}
+      className={`group relative w-full mx-auto bg-white/[0.03] backdrop-blur-sm rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.2)] ring-1 ring-white/[0.08] overflow-hidden transition-all duration-500 hover:shadow-[0_12px_45px_rgb(0,0,0,0.3)] hover:ring-white/[0.12] ${step === 'chat' ? 'max-w-2xl' : 'max-w-xl'}`}
     >
       <motion.div 
          className="pointer-events-none absolute -inset-px rounded-[2rem] transition duration-500 opacity-0 group-hover:opacity-100 z-0" 
@@ -143,7 +143,7 @@ export default function ChatDocumentCard() {
         
         {step !== 'chat' && (
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-900 drop-shadow-sm">
+            <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-100 drop-shadow-sm">
               Chat with Document
             </h2>
             <p className="text-sm sm:text-base text-zinc-500 mt-2 font-medium">
@@ -160,16 +160,16 @@ export default function ChatDocumentCard() {
               <motion.div key="idle" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
                 <div 
                   {...getRootProps()} 
-                  className={`border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer group ${isDragActive ? "border-indigo-500 bg-indigo-50/50 scale-[1.02] shadow-inner" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"}`}
+                  className={`border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer group ${isDragActive ? "border-indigo-500/60 bg-indigo-500/10 scale-[1.02]" : "border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30"}`}
                 >
                   <input {...getInputProps()} />
-                  <div className="w-16 h-16 mb-5 bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
-                    <FileText className={`w-8 h-8 transition-colors duration-300 ${isDragActive ? "text-indigo-600" : "text-zinc-400 group-hover:text-indigo-500"}`} />
+                  <div className="w-16 h-16 mb-5 bg-white/[0.06] rounded-2xl ring-1 ring-white/[0.1] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
+                    <FileText className={`w-8 h-8 transition-colors duration-300 ${isDragActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-indigo-400"}`} />
                   </div>
-                  <p className="text-base font-semibold text-zinc-800 text-center">
+                  <p className="text-base font-semibold text-zinc-300 text-center">
                     {isDragActive ? "Drop the PDF here..." : "Drag & drop a manual or contract"}
                   </p>
-                  <p className="text-sm text-zinc-500 mt-2 font-medium text-center">PDF standard format only</p>
+                  <p className="text-sm text-zinc-600 mt-2 font-medium text-center">PDF standard format only</p>
                 </div>
               </motion.div>
             )}
@@ -177,11 +177,9 @@ export default function ChatDocumentCard() {
             {/* STEP 2: PROCESSING (The Geometric Document Scanner) */}
             {step === 'processing' && (
               <motion.div key="processing" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full flex flex-col items-center justify-center py-8">
-                <div className="w-28 h-28 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-zinc-100/50 rounded-[2rem] flex items-center justify-center relative overflow-hidden z-10 mb-8">
-                   {/* Scanning Grid Background */}
-                   <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.1)_1px,transparent_1px)] bg-[size:10px_10px] opacity-30" />
+                <div className="w-28 h-28 bg-white/[0.04] shadow-[0_8px_30px_rgb(0,0,0,0.2)] ring-1 ring-white/[0.08] rounded-[2rem] flex items-center justify-center relative overflow-hidden z-10 mb-8">
+                   <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.15)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.15)_1px,transparent_1px)] bg-[size:10px_10px] opacity-30" />
                    
-                   {/* Floating Document Layers */}
                    {[...Array(3)].map((_, i) => (
                       <motion.div 
                         key={i}
@@ -191,63 +189,62 @@ export default function ChatDocumentCard() {
                            rotateZ: [i * -10, i * 10, i * -10]
                         }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
-                        className={`absolute w-12 h-16 border rounded bg-white/80 shadow-md flex items-start justify-center pt-2 ${i === 0 ? 'border-indigo-400 z-30' : 'border-zinc-200 z-10 opacity-50'}`}
+                        className={`absolute w-12 h-16 border rounded flex items-start justify-center pt-2 ${i === 0 ? 'border-indigo-400/50 z-30 bg-white/[0.08]' : 'border-white/[0.08] z-10 opacity-40 bg-white/[0.04]'}`}
                       >
-                         {i === 0 && <FileText className="w-4 h-4 text-indigo-500" />}
+                         {i === 0 && <FileText className="w-4 h-4 text-indigo-400" />}
                       </motion.div>
                    ))}
                    
-                   {/* Deep Scan laser */}
                    <motion.div 
                       animate={{ top: ['-20%', '120%', '-20%'] }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="absolute left-0 right-0 h-[2px] bg-blue-500 shadow-[0_0_8px_2px_rgba(59,130,246,0.5)] z-40"
+                      className="absolute left-0 right-0 h-[2px] bg-cyan-400 shadow-[0_0_8px_2px_rgba(34,211,238,0.5)] z-40"
                    />
                 </div>
-                <p className="text-base font-semibold text-zinc-900">Studying Document...</p>
+                <p className="text-base font-semibold text-zinc-200">Studying Document...</p>
                 <p className="mt-1.5 text-sm text-zinc-500 font-medium">Extracting textual architecture.</p>
               </motion.div>
             )}
 
             {/* STEP 3: CHAT INTERFACE */}
             {step === 'chat' && (
-              <motion.div key="chat" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="absolute inset-0 w-full flex flex-col bg-white rounded-[2rem] overflow-hidden">
+              <motion.div key="chat" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="absolute inset-0 w-full flex flex-col bg-[#0A0A1A] rounded-[2rem] overflow-hidden">
                  
                  {/* Top Header */}
-                 <div className="flex-none flex items-center justify-between p-4 border-b border-zinc-100 bg-white z-20 shadow-sm">
+                 <div className="flex-none flex items-center justify-between p-4 border-b border-white/[0.06] bg-white/[0.02] z-20">
                     <div className="flex items-center gap-3">
-                       <div className="bg-indigo-50 p-2 rounded-xl">
-                          <FileText className="w-5 h-5 text-indigo-600" />
+                       <div className="bg-indigo-500/15 p-2 rounded-xl">
+                          <FileText className="w-5 h-5 text-indigo-400" />
                        </div>
                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-zinc-900 truncate max-w-[200px] sm:max-w-xs">{file?.name}</span>
-                          <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div> Active Context
+                          <span className="text-sm font-bold text-zinc-200 truncate max-w-[200px] sm:max-w-xs">{file?.name}</span>
+                          <span className="text-xs text-green-400 font-medium flex items-center gap-1">
+                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div> Active Context
                           </span>
                        </div>
                     </div>
-                    <button onClick={handleReset} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all h-fit">
+                    <button onClick={handleReset} className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all h-fit">
                        <X className="w-5 h-5" />
                     </button>
                  </div>
 
                  {/* Chat Area */}
-                 <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-6 py-6 pb-8 bg-[#FAFAFA] flex flex-col gap-6 custom-scrollbar">
+                 <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-6 py-6 pb-8 bg-[#0D0D1F] flex flex-col gap-6 custom-scrollbar">
                     {messages.map((msg, idx) => (
                        <motion.div 
                          key={idx} 
                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                         className={`flex max-w-[85%] ${msg.role === 'user' ? 'self-end bg-indigo-600 text-white rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-bl-[1.5rem] rounded-br-sm' : 'self-start bg-white ring-1 ring-zinc-200 text-zinc-800 shadow-sm rounded-tl-sm rounded-tr-[1.5rem] rounded-br-[1.5rem] rounded-bl-[1.5rem]'}`}
+                         className={`flex max-w-[85%] ${msg.role === 'user' ? 'self-end bg-indigo-600 text-white rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-bl-[1.5rem] rounded-br-sm' : 'self-start bg-white/[0.05] ring-1 ring-white/[0.08] text-zinc-300 rounded-tl-sm rounded-tr-[1.5rem] rounded-br-[1.5rem] rounded-bl-[1.5rem]'}`}
                        >
-                          <div className="px-5 py-3.5 text-sm font-medium leading-relaxed drop-shadow-sm whitespace-pre-wrap">
+                          <div className="px-5 py-3.5 text-sm font-medium leading-relaxed whitespace-pre-wrap">
                              {msg.text}
                           </div>
                        </motion.div>
                     ))}
                     
                     {isAsking && (
-                       <div className="self-start bg-white ring-1 ring-zinc-200 text-zinc-500 shadow-sm rounded-tl-sm rounded-tr-[1.5rem] rounded-br-[1.5rem] rounded-bl-[1.5rem] px-5 py-4 flex items-center gap-2">
+                       <div className="self-start bg-white/[0.05] ring-1 ring-white/[0.08] text-zinc-400 rounded-tl-sm rounded-tr-[1.5rem] rounded-br-[1.5rem] rounded-bl-[1.5rem] px-5 py-4 flex items-center gap-2">
                           <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-100"></div>
                           <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
@@ -256,16 +253,16 @@ export default function ChatDocumentCard() {
                  </div>
 
                  {/* Input Bar */}
-                 <div className="flex-none p-4 bg-white border-t border-zinc-100 relative z-20">
+                 <div className="flex-none p-4 bg-white/[0.02] border-t border-white/[0.06] relative z-20">
                     <form onSubmit={handleAskQuestion} className="relative flex items-center">
-                       <div className="absolute left-4 opacity-50"><Sparkles className="w-5 h-5 text-indigo-500" /></div>
+                       <div className="absolute left-4 opacity-50"><Sparkles className="w-5 h-5 text-indigo-400" /></div>
                        <input 
                           type="text" 
                           disabled={isAsking}
                           value={question}
                           onChange={(e) => setQuestion(e.target.value)}
                           placeholder="Ask a question about this file..."
-                          className="w-full bg-[#FAFAFA] ring-1 ring-zinc-200 hover:bg-white focus:bg-white rounded-full py-4 pl-12 pr-14 text-sm font-medium text-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner placeholder-zinc-400 disabled:opacity-50"
+                          className="w-full bg-white/[0.04] ring-1 ring-white/[0.1] hover:bg-white/[0.06] focus:bg-white/[0.06] rounded-full py-4 pl-12 pr-14 text-sm font-medium text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder-zinc-600 disabled:opacity-50"
                        />
                        <button 
                           type="submit" 

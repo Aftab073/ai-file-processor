@@ -150,11 +150,11 @@ export default function AudioTranscribeCard() {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-black/5 overflow-hidden transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)]">
+    <div className="w-full max-w-xl mx-auto bg-white/[0.03] backdrop-blur-sm rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.2)] ring-1 ring-white/[0.08] overflow-hidden transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.3)] hover:ring-white/[0.12]">
       <div className="p-8 sm:p-10">
         
         <div className="text-center mb-8">
-          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-900 drop-shadow-sm">
+          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-zinc-100 drop-shadow-sm">
             Transcribe Audio
           </h2>
           <p className="text-sm sm:text-base text-zinc-500 mt-2 font-medium">
@@ -171,13 +171,13 @@ export default function AudioTranscribeCard() {
                 
                 {/* Input Mode Toggle */}
                 <div className="flex items-center justify-center mb-6">
-                  <div className="inline-flex bg-zinc-100 rounded-2xl p-1 ring-1 ring-zinc-200/50">
+                  <div className="inline-flex bg-white/[0.04] rounded-2xl p-1 ring-1 ring-white/[0.08]">
                     <button
                       onClick={() => setInputMode('file')}
                       className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                         inputMode === 'file' 
-                          ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100' 
-                          : 'text-zinc-500 hover:text-zinc-700'
+                          ? 'bg-indigo-500/15 text-indigo-400 ring-1 ring-indigo-500/20' 
+                          : 'text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
                       <Upload className="w-4 h-4" />
@@ -187,8 +187,8 @@ export default function AudioTranscribeCard() {
                       onClick={() => setInputMode('url')}
                       className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                         inputMode === 'url' 
-                          ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100' 
-                          : 'text-zinc-500 hover:text-zinc-700'
+                          ? 'bg-indigo-500/15 text-indigo-400 ring-1 ring-indigo-500/20' 
+                          : 'text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
                       <Link className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function AudioTranscribeCard() {
                         {...getRootProps()} 
                         onMouseEnter={() => setIsHovered(true)}
                         onMouseLeave={() => setIsHovered(false)}
-                        className={`relative border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group overflow-hidden ${isDragActive || isHovered ? "border-indigo-500 bg-indigo-50/80 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.1)]" : "border-zinc-200 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)]"}`}
+                        className={`relative border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group overflow-hidden ${isDragActive || isHovered ? "border-indigo-500/60 bg-indigo-500/10 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.15)]" : "border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30"}`}
                       >
                         <input {...getInputProps()} />
                         
@@ -233,21 +233,21 @@ export default function AudioTranscribeCard() {
                     </motion.div>
                   ) : (
                     <motion.div key="url-input" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="w-full">
-                      <div className="relative border-2 border-dashed rounded-[1.5rem] p-10 lg:p-12 flex flex-col items-center justify-center transition-all duration-500 bg-[#FAFAFA] hover:bg-white hover:border-indigo-300 group border-zinc-200">
+                      <div className="relative border-2 border-dashed rounded-[1.5rem] p-10 lg:p-12 flex flex-col items-center justify-center transition-all duration-500 bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30 group border-white/[0.1]">
                         
                         <div className="relative w-16 h-16 mb-6 flex items-center justify-center">
-                          <div className="w-full h-full bg-white rounded-2xl shadow-sm ring-1 ring-zinc-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                            <Globe className="w-7 h-7 text-zinc-400 group-hover:text-indigo-500 transition-colors duration-300" />
+                          <div className="w-full h-full bg-white/[0.06] rounded-2xl shadow-sm ring-1 ring-white/[0.1] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                            <Globe className="w-7 h-7 text-zinc-500 group-hover:text-indigo-400 transition-colors duration-300" />
                           </div>
                         </div>
                         
-                        <p className="text-base font-bold text-zinc-800 mb-1">Paste a video or audio URL</p>
-                        <p className="text-xs text-zinc-500 font-medium mb-6">YouTube, Instagram, Twitter/X, and 1000+ platforms</p>
+                        <p className="text-base font-bold text-zinc-300 mb-1">Paste a video or audio URL</p>
+                        <p className="text-xs text-zinc-600 font-medium mb-6">YouTube, Instagram, Twitter/X, and 1000+ platforms</p>
                         
                         <div className="w-full flex gap-3">
                           <div className="flex-1 relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Link className="h-4 w-4 text-zinc-400" />
+                              <Link className="h-4 w-4 text-zinc-600" />
                             </div>
                             <input
                               type="url"
@@ -255,19 +255,19 @@ export default function AudioTranscribeCard() {
                               onChange={(e) => setUrl(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()}
                               placeholder="https://youtube.com/watch?v=..."
-                              className="block w-full pl-11 pr-4 py-3.5 ring-1 ring-zinc-200 rounded-xl bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all duration-300"
+                              className="block w-full pl-11 pr-4 py-3.5 ring-1 ring-white/[0.1] rounded-xl bg-white/[0.04] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all duration-300"
                             />
                           </div>
                           <button
                             onClick={handleUrlSubmit}
                             disabled={!url.trim()}
-                            className="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-300 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                            className="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-300 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5"
                           >
                             Go
                           </button>
                         </div>
 
-                        <p className="text-[11px] text-zinc-400 font-medium mt-4">⏱ Max 5-minute videos supported on free tier</p>
+                        <p className="text-[11px] text-zinc-600 font-medium mt-4">⏱ Max 5-minute videos supported on free tier</p>
                       </div>
                     </motion.div>
                   )}
@@ -278,30 +278,30 @@ export default function AudioTranscribeCard() {
             {/* STEP 2: READY */}
             {step === 'ready' && (
               <motion.div key="ready" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
-                <div className="flex items-center justify-between p-4 mb-6 bg-white ring-1 ring-zinc-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-2xl group">
+                <div className="flex items-center justify-between p-4 mb-6 bg-white/[0.04] ring-1 ring-white/[0.08] rounded-2xl group">
                   <div className="flex items-center space-x-4 overflow-hidden">
-                    <div className="bg-indigo-50/50 p-2.5 rounded-xl shadow-sm border border-indigo-100/50 group-hover:scale-105 transition-transform duration-300">
+                    <div className="bg-indigo-500/15 p-2.5 rounded-xl border border-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
                       {inputMode === 'file' ? (
-                        <FileAudio className="w-6 h-6 text-indigo-600" />
+                        <FileAudio className="w-6 h-6 text-indigo-400" />
                       ) : (
-                        <Globe className="w-6 h-6 text-indigo-600" />
+                        <Globe className="w-6 h-6 text-indigo-400" />
                       )}
                     </div>
                     <div className="text-left overflow-hidden">
                       {inputMode === 'file' ? (
                         <>
-                          <p className="text-sm font-semibold text-zinc-900 truncate max-w-[220px] sm:max-w-[300px]">{file?.name}</p>
+                          <p className="text-sm font-semibold text-zinc-200 truncate max-w-[220px] sm:max-w-[300px]">{file?.name}</p>
                           <p className="text-xs text-zinc-500 font-medium mt-0.5">{file ? (file.size / (1024 * 1024)).toFixed(2) : 0} MB</p>
                         </>
                       ) : (
                         <>
-                          <p className="text-sm font-semibold text-zinc-900 truncate max-w-[220px] sm:max-w-[300px]">{url}</p>
+                          <p className="text-sm font-semibold text-zinc-200 truncate max-w-[220px] sm:max-w-[300px]">{url}</p>
                           <p className="text-xs text-zinc-500 font-medium mt-0.5">URL Transcription</p>
                         </>
                       )}
                     </div>
                   </div>
-                  <button onClick={handleReset} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-100">
+                  <button onClick={handleReset} className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -311,7 +311,7 @@ export default function AudioTranscribeCard() {
                     <Sparkles className="h-5 w-5 text-indigo-500 transition-transform duration-300 group-focus-within:scale-110 group-focus-within:text-indigo-600" />
                   </div>
                   <select
-                    className="block w-full pl-12 pr-4 py-4 ring-1 ring-zinc-200 rounded-2xl leading-5 bg-[#FAFAFA] hover:bg-white text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent sm:text-base shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all duration-300 appearance-none cursor-pointer"
+                    className="block w-full pl-12 pr-4 py-4 ring-1 ring-white/[0.1] rounded-2xl leading-5 bg-white/[0.04] hover:bg-white/[0.06] text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-base transition-all duration-300 appearance-none cursor-pointer"
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
                   >
@@ -397,8 +397,8 @@ export default function AudioTranscribeCard() {
                 {/* Header with stats */}
                 <div className="flex items-center justify-between mb-5 px-1">
                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                      <h3 className="text-sm font-bold text-zinc-900">Transcript Ready</h3>
+                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                      <h3 className="text-sm font-bold text-zinc-200">Transcript Ready</h3>
                    </div>
                    <div className="flex items-center gap-2">
                      <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-100 px-2 py-1 rounded-md">{result.word_count} words</span>
@@ -455,9 +455,9 @@ export default function AudioTranscribeCard() {
                 )}
                 
                 {/* Full Transcript */}
-                <div className="w-full bg-[#FAFAFA] ring-1 ring-zinc-200 rounded-2xl p-5 mb-6 text-left shadow-inner">
-                    <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Full Transcript</h4>
-                    <p className="text-sm text-zinc-700 leading-relaxed h-32 overflow-y-auto pr-2 custom-scrollbar font-medium">
+                <div className="w-full bg-white/[0.04] ring-1 ring-white/[0.08] rounded-2xl p-5 mb-6 text-left">
+                    <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Full Transcript</h4>
+                    <p className="text-sm text-zinc-300 leading-relaxed h-32 overflow-y-auto pr-2 custom-scrollbar font-medium">
                         {result.text}
                     </p>
                 </div>
@@ -466,7 +466,7 @@ export default function AudioTranscribeCard() {
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <button
                     onClick={handleCopy}
-                    className="flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 ring-1 ring-indigo-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+                    className="flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 ring-1 ring-indigo-500/20 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Copy
@@ -483,7 +483,7 @@ export default function AudioTranscribeCard() {
                 
                 <button
                   onClick={handleReset}
-                  className="w-full flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-200 transition-all duration-200"
+                  className="w-full flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-white/[0.1] transition-all duration-200"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Transcribe another
