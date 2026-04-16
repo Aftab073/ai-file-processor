@@ -152,7 +152,7 @@ export default function FileProcessorCard() {
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                   className={cn(
-                    "relative overflow-hidden border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group",
+                    "relative overflow-hidden border-2 border-dashed rounded-[1.5rem] p-8 sm:p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-500 cursor-pointer group",
                     isDragActive || isHovered ? "border-indigo-500/60 bg-indigo-500/10 scale-[1.02] shadow-[inset_0_4px_30px_rgba(99,102,241,0.15)]" : "border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30"
                   )}
                 >

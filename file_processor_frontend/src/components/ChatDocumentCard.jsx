@@ -160,7 +160,7 @@ export default function ChatDocumentCard() {
               <motion.div key="idle" variants={fadeVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
                 <div 
                   {...getRootProps()} 
-                  className={`border-2 border-dashed rounded-[1.5rem] p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer group ${isDragActive ? "border-indigo-500/60 bg-indigo-500/10 scale-[1.02]" : "border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30"}`}
+                  className={`border-2 border-dashed rounded-[1.5rem] p-8 sm:p-12 lg:p-16 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer group ${isDragActive ? "border-indigo-500/60 bg-indigo-500/10 scale-[1.02]" : "border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.04] hover:border-indigo-500/30"}`}
                 >
                   <input {...getInputProps()} />
                   <div className="w-16 h-16 mb-5 bg-white/[0.06] rounded-2xl ring-1 ring-white/[0.1] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">

@@ -5,7 +5,7 @@ import FileProcessorCard from './FileProcessorCard';
 import AudioTranscribeCard from './AudioTranscribeCard';
 import ChatDocumentCard from './ChatDocumentCard';
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ onGoHome }) {
   const [activeView, setActiveView] = useState('dashboard');
 
   const tools = {
@@ -51,7 +51,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A1A] flex font-sans text-zinc-100 selection:bg-indigo-500/30 selection:text-white">
+    <div className="min-h-screen bg-[#0A0A1A] flex flex-col md:flex-row font-sans text-zinc-100 selection:bg-indigo-500/30 selection:text-white">
       
       {/* Aurora Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -67,14 +67,14 @@ export default function DashboardLayout() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-20 lg:w-64 bg-white/[0.03] backdrop-blur-xl border-r border-white/[0.06] flex flex-col hidden md:flex transition-all duration-300 z-10 sticky top-0 h-screen"
       >
-        <div className="p-6 flex items-center justify-center lg:justify-start gap-3">
-          <div className="w-10 h-10 bg-white/[0.06] rounded-[1rem] flex items-center justify-center shadow-sm shrink-0 overflow-hidden ring-1 ring-white/[0.1]">
-            <img src="/logo.png" alt="DocuMind Logo" className="w-[140%] h-[140%] object-cover object-center pointer-events-none" />
+        <div onClick={onGoHome} className="p-6 flex items-center justify-center lg:justify-start gap-3 cursor-pointer group">
+          <div className="w-10 h-10 bg-white/[0.06] rounded-[1rem] flex items-center justify-center shadow-sm shrink-0 overflow-hidden ring-1 ring-white/[0.1] group-hover:ring-indigo-500/50 transition-all duration-300">
+            <img src="/logo.png" alt="DocuMind Logo" className="w-[140%] h-[140%] object-cover object-center pointer-events-none group-hover:scale-110 transition-transform duration-500" />
           </div>
           <motion.span 
              animate={{ backgroundPosition: ['0% 50%', '200% 50%'] }}
              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-             className="font-extrabold text-xl tracking-tight hidden lg:block bg-gradient-to-r from-white via-indigo-400 to-white bg-[length:200%_auto] bg-clip-text text-transparent drop-shadow-sm"
+             className="font-extrabold text-xl tracking-tight hidden lg:block bg-gradient-to-r from-white via-indigo-400 to-white bg-[length:200%_auto] bg-clip-text text-transparent drop-shadow-sm group-hover:opacity-80 transition-opacity"
           >
             DocuMind
           </motion.span>
@@ -101,8 +101,26 @@ export default function DashboardLayout() {
         </div>
       </motion.aside>
 
+      {/* MOBILE TOP HEADER (visible below md) */}
+      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-[#0A0A1A]/80 backdrop-blur-xl border-b border-white/[0.06]">
+        <div onClick={onGoHome} className="flex items-center gap-2.5 cursor-pointer">
+          <div className="w-8 h-8 bg-white/[0.06] rounded-xl flex items-center justify-center overflow-hidden ring-1 ring-white/[0.1]">
+            <img src="/logo.png" alt="DocuMind" className="w-[140%] h-[140%] object-cover object-center pointer-events-none" />
+          </div>
+          <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-indigo-400 bg-clip-text text-transparent">DocuMind</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href="https://github.com/Aftab073/ai-file-processor" target="_blank" rel="noopener noreferrer" className="p-2 text-zinc-500 hover:text-zinc-300 transition-colors">
+            <Code size={18} />
+          </a>
+          <a href="https://www.linkedin.com/in/aftabt7" target="_blank" rel="noopener noreferrer" className="p-2 text-zinc-500 hover:text-zinc-300 transition-colors">
+            <User size={18} />
+          </a>
+        </div>
+      </div>
+
       {/* 2. MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto relative z-[1]">
+      <main className="flex-1 flex flex-col min-h-0 overflow-y-auto relative z-[1] pb-20 md:pb-0 md:h-screen">
         
         <motion.div 
           variants={containerVariants}
@@ -145,8 +163,8 @@ export default function DashboardLayout() {
                   </AnimatePresence>
                 </motion.div>
 
-                {/* Right Side: Showcase */}
-                <motion.div variants={itemVariants} className="w-full lg:w-5/12 flex flex-col justify-center max-w-xl">
+                {/* Right Side: Showcase — hidden on mobile for tool views */}
+                <motion.div variants={itemVariants} className="w-full lg:w-5/12 flex-col justify-center max-w-xl hidden lg:flex">
                   <div className="flex items-center gap-4 mb-8">
                     <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Available Soon</h2>
                     <div className="h-px bg-gradient-to-r from-white/10 to-transparent flex-1"></div>
@@ -170,6 +188,18 @@ export default function DashboardLayout() {
 
         </motion.div>
       </main>
+
+      {/* MOBILE BOTTOM TAB BAR (visible below md) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0A0A1A]/90 backdrop-blur-xl border-t border-white/[0.06]">
+        <div className="flex items-center justify-around py-2 px-2">
+          <MobileTab icon={<LayoutDashboard size={20} />} label="Home" active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
+          <MobileTab icon={<Zap size={20} />} label="Compress" active={activeView === 'file-processor'} onClick={() => setActiveView('file-processor')} />
+          <MobileTab icon={<Activity size={20} />} label="Transcribe" active={activeView === 'audio-transcriber'} onClick={() => setActiveView('audio-transcriber')} />
+          <MobileTab icon={<FileText size={20} />} label="Chat" active={activeView === 'chat-document'} onClick={() => setActiveView('chat-document')} />
+        </div>
+        {/* Safe area padding for notched phones */}
+        <div className="h-[env(safe-area-inset-bottom)]" />
+      </div>
     </div>
   );
 }
@@ -280,5 +310,26 @@ function ComingSoonCard({ icon, title, desc, isAvailable, onClick }) {
         <p className="text-[11px] font-medium text-zinc-600 leading-snug">{desc}</p>
       </div>
     </div>
+  );
+}
+
+function MobileTab({ icon, label, active, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${active ? 'text-indigo-400' : 'text-zinc-600 active:text-zinc-400'}`}
+    >
+      <span className="relative">
+        {icon}
+        {active && (
+          <motion.div 
+            layoutId="mobileTabDot"
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-400 rounded-full"
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          />
+        )}
+      </span>
+      <span className="text-[10px] font-semibold">{label}</span>
+    </button>
   );
 }
